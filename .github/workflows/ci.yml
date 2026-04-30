@@ -1,26 +1,29 @@
-name: CI/CD Pipeline
+name: CI + Docker
 
+on:
+  push:
+    branches: [ "main" ]
 
-on: 
-    push: 
-        branches: [ "main" ] 
-    
-jobs: 
-    test: 
-        runs-on: ubuntu-latest 
-        
-        steps: 
-            - name: Checkout code 
-              uses: actions/checkout@v3 
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-            - name: Set up Python 
-              uses: actions/setup-python@v4 
-              with:
-                python-version: "3.10" 
+    steps:
+      - uses: actions/checkout@v3
 
-            - name: Install dependencies 
-              run: |
-                pip install -r requirements.txt 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-            - name: Run tests 
-              run: pytest
+      - run: pip install -r requirements.txt
+      - run: pytest
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: docker build -t flask-ci-app .
